@@ -334,6 +334,7 @@ static int dw_dphy_configure(struct phy *phy, union phy_configure_opts *opts)
 	u32 val;
 	int ret;
 
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 	ret = dw_dphy_config_from_opts(phy, &opts->mipi_dphy, &cfg);
 	if (ret)
 		return ret;
@@ -363,6 +364,7 @@ static int dw_dphy_validate(struct phy *phy, enum phy_mode mode, int submode,
 {
 	struct dw_dphy_cfg cfg = { 0 };
 
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 	if (mode != PHY_MODE_MIPI_DPHY)
 		return -EINVAL;
 
@@ -371,6 +373,7 @@ static int dw_dphy_validate(struct phy *phy, enum phy_mode mode, int submode,
 
 static void dw_dphy_clear_reg(struct phy *phy)
 {
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 	phy_write(phy, 0, DSI_REG);
 	phy_write(phy, 0, DSI_WRITE_REG0);
 	phy_write(phy, 0, DSI_WRITE_REG1);
@@ -381,6 +384,8 @@ static int dw_dphy_init(struct phy *phy)
 	struct dw_dphy_priv *priv = phy_get_drvdata(phy);
 	int ret;
 
+
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 	ret = pm_runtime_get_sync(&phy->dev);
 	if (ret < 0) {
 		dev_err(&phy->dev, "failed to get PM runtime: %d\n", ret);
@@ -403,6 +408,7 @@ static int dw_dphy_exit(struct phy *phy)
 {
 	struct dw_dphy_priv *priv = phy_get_drvdata(phy);
 
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 	dw_dphy_clear_reg(phy);
 	clk_disable_unprepare(priv->cfg_clk);
 	pm_runtime_put(&phy->dev);
@@ -415,6 +421,7 @@ static int dw_dphy_update_pll(struct phy *phy)
 	struct dw_dphy_priv *priv = phy_get_drvdata(phy);
 	int ret;
 
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 	ret = regmap_update_bits(priv->regmap, DSI_REG, UPDATE_PLL, UPDATE_PLL);
 	if (ret < 0) {
 		dev_err(&phy->dev, "failed to set UPDATE_PLL: %d\n", ret);
@@ -443,6 +450,7 @@ static int dw_dphy_power_on(struct phy *phy)
 	struct device *dev = &phy->dev;
 	int ret;
 
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 	ret = clk_prepare_enable(priv->ref_clk);
 	if (ret < 0) {
 		dev_err(dev, "failed to enable ref clock: %d\n", ret);
@@ -468,9 +476,16 @@ static int dw_dphy_power_off(struct phy *phy)
 {
 	struct dw_dphy_priv *priv = phy_get_drvdata(phy);
 
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 	dw_dphy_clear_reg(phy);
 	clk_disable_unprepare(priv->ref_clk);
 
+	return 0;
+}
+
+static int dw_dphy_reset(struct phy *phy)
+{
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 	return 0;
 }
 
@@ -481,6 +496,7 @@ static const struct phy_ops dw_dphy_phy_ops = {
 	.power_off = dw_dphy_power_off,
 	.configure = dw_dphy_configure,
 	.validate = dw_dphy_validate,
+	.reset = dw_dphy_reset,
 	.owner = THIS_MODULE,
 };
 
@@ -554,6 +570,11 @@ static int dw_dphy_probe(struct platform_device *pdev)
 		dev_err(dev, "failed to register PHY provider: %d\n", ret);
 		goto err;
 	}
+
+	//dw_dphy_init(phy);
+	//dw_dphy_power_on(phy);
+
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 
 	return 0;
 err:
