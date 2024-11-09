@@ -199,6 +199,10 @@
 
 #define DSI_PHY_STATUS			0xb0
 #define PHY_STOP_STATE_CLK_LANE		BIT(2)
+#define PHY_STOP_STATE_LANE0		BIT(4)
+#define PHY_STOP_STATE_LANE1		BIT(7)
+#define PHY_STOP_STATE_LANE2		BIT(9)
+#define PHY_STOP_STATE_LANE3		BIT(11)
 #define PHY_LOCK			BIT(0)
 
 #define DSI_PHY_TST_CTRL0		0xb4
@@ -913,6 +917,30 @@ static void dw_mipi_dsi_dphy_enable(struct dw_mipi_dsi *dsi)
 				 PHY_STATUS_TIMEOUT_US);
 	if (ret)
 		DRM_DEBUG_DRIVER("failed to wait phy clk lane stop state\n");
+
+	ret = readl_poll_timeout(dsi->base + DSI_PHY_STATUS,
+				 val, val & PHY_STOP_STATE_LANE0, 1000,
+				 PHY_STATUS_TIMEOUT_US);
+	if (ret)
+		DRM_DEBUG_DRIVER("failed to wait phy lane 0 stop state\n");
+
+	ret = readl_poll_timeout(dsi->base + DSI_PHY_STATUS,
+				 val, val & PHY_STOP_STATE_LANE1, 1000,
+				 PHY_STATUS_TIMEOUT_US);
+	if (ret)
+		DRM_DEBUG_DRIVER("failed to wait phy lane 1 stop state\n");
+
+	ret = readl_poll_timeout(dsi->base + DSI_PHY_STATUS,
+				 val, val & PHY_STOP_STATE_LANE2, 1000,
+				 PHY_STATUS_TIMEOUT_US);
+	if (ret)
+		DRM_DEBUG_DRIVER("failed to wait phy lane 2 stop state\n");
+
+	ret = readl_poll_timeout(dsi->base + DSI_PHY_STATUS,
+				 val, val & PHY_STOP_STATE_LANE3, 1000,
+				 PHY_STATUS_TIMEOUT_US);
+	if (ret)
+		DRM_DEBUG_DRIVER("failed to wait phy lane 3 stop state\n");
 }
 
 static void dw_mipi_dsi_clear_err(struct dw_mipi_dsi *dsi)
@@ -981,6 +1009,8 @@ static void dw_mipi_dsi_mode_set(struct dw_mipi_dsi *dsi,
 	void *priv_data = dsi->plat_data->priv_data;
 	int ret;
 	u32 lanes = dw_mipi_dsi_get_lanes(dsi);
+
+	printk(KERN_INFO "HERE: %s, %s, %d\n", __FILE__, __FUNCTION__, __LINE__);
 
 	clk_prepare_enable(dsi->pclk);
 
